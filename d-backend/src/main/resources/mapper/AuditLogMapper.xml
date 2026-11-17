@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bjut.cs.ticket.mapper.AuditLogMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.bjut.cs.ticket.entity.AuditLog">
+        <id column="log_id" property="logId" />
+        <result column="admin_id" property="adminId" />
+        <result column="target_type" property="targetType" />
+        <result column="target_id" property="targetId" />
+        <result column="action" property="action" />
+        <result column="result" property="result" />
+        <result column="remark" property="remark" />
+        <result column="created_at" property="createdAt" />
+    </resultMap>
+
+</mapper>

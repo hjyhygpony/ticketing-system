@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+backend/.env
+
+# Java / Maven
+d-backend/target/
+*.class
+*.jar
+
+# Runtime data
+uploads/
+*.db
+*.sqlite
+*.log
+
+# Editors
+.idea/
+.vscode/
+*.iml
+
+# OS / archives
+.DS_Store
+Thumbs.db
+*.zip
+*.rar
+*.7z

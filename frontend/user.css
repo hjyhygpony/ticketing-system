@@ -1,0 +1,150 @@
+.user-layout {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  align-items: start;
+}
+
+.user-column {
+  display: grid;
+  gap: 16px;
+  align-content: start;
+  min-width: 0;
+}
+
+.sub-panel {
+  width: 100%;
+  margin: 0;
+  padding: 18px;
+}
+
+.collapse-toggle {
+  width: 100%;
+  border: none;
+  background: transparent;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+}
+
+.collapse-copy {
+  display: grid;
+  gap: 4px;
+}
+
+.collapse-title {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 20px;
+  color: var(--text);
+}
+
+.collapse-arrow {
+  font-size: 18px;
+  color: var(--muted);
+}
+
+.collapse-body {
+  margin-top: 14px;
+}
+
+.verify-note {
+  margin: 12px 0 16px;
+  padding: 12px 14px;
+  border-left: 4px solid var(--primary);
+  background: rgba(244, 223, 209, 0.48);
+  border-radius: 12px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.verify-done {
+  display: grid;
+  gap: 12px;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.summary-card {
+  padding: 16px;
+}
+
+.summary-card strong {
+  display: block;
+  margin-top: 8px;
+  font-size: 24px;
+}
+
+.basic-info {
+  display: grid;
+  gap: 12px;
+}
+
+.basic-box {
+  padding: 14px;
+}
+
+.basic-box strong {
+  display: block;
+  margin-top: 6px;
+}
+
+.stack-list {
+  display: grid;
+  gap: 12px;
+}
+
+.stack-item {
+  padding: 14px;
+  display: grid;
+  gap: 8px;
+}
+
+.stack-item strong {
+  word-break: break-word;
+}
+
+.message-unread {
+  background: rgba(241, 252, 244, 0.88);
+}
+
+.message-read {
+  background: rgba(245, 245, 245, 0.82);
+}
+
+.message-mark-btn,
+.message-read-btn {
+  border: none;
+  border-radius: 12px;
+  padding: 8px 14px;
+  font: inherit;
+  min-width: 96px;
+  text-align: center;
+}
+
+.message-mark-btn {
+  background: #2f8d4f;
+  color: #fff;
+  cursor: pointer;
+}
+
+.message-read-btn {
+  background: #c7c7c7;
+  color: #fff;
+  cursor: not-allowed;
+}
+
+@media (max-width: 960px) {
+  .user-layout {
+    grid-template-columns: 1fr;
+  }
+}

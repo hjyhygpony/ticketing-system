@@ -1,0 +1,308 @@
+// ============================================================
+// 电子票务系统 (Ticket) — 数据库结构定义
+// 生成自 mysql.sql，数据库: ruanjian
+// ============================================================
+
+// ─── 用户 ───────────────────────────────────────────────────
+
+Table user {
+  user_id        int [pk, increment, note: '用户ID']
+  phone          varchar(255) [unique, not null, note: '手机号']
+  password_hash  varchar(255) [not null, note: '密码哈希']
+  real_name      varchar(255) [note: '实名姓名（加密存储）']
+  idcard         varchar(255) [unique, note: '身份证号（加密），一证一号']
+  nickname       varchar(40)  [note: '用户昵称']
+  avatar_url     text         [note: '头像数据或地址']
+  gender         varchar(10)  [not null, default: '保密', note: '性别：男/女/保密']
+  bio            varchar(200) [note: '个人简介']
+  is_verified    int          [not null, default: 0, note: '是否已实名认证：0否 1是']
+  role           int          [not null, default: 0, note: '角色：0消费者 1演出方 2管理员']
+  balance        decimal      [not null, default: 0, note: '账户余额（虚拟）']
+  status         int          [not null, default: 1, note: '账号状态：0封禁 1正常 2禁言']
+  register_time  timestamp    [not null, default: `CURRENT_TIMESTAMP`, note: '注册时间']
+}
+
+Table user_qualification {
+  qual_id       int [pk, increment, note: '资质记录ID']
+  user_id       int [not null, ref: > user.user_id, note: '关联用户']
+  company_name  varchar(255) [not null, note: '公司名称']
+  credit_code   varchar(255) [unique, not null, note: '统一社会信用代码']
+  license_url   varchar(255) [not null, note: '营业执照URL']
+  contact_name  varchar(255) [not null, note: '联系人']
+  contact_phone varchar(255) [not null, note: '联系电话']
+  audit_status  int          [not null, default: 0, note: '审核状态：0待审核 1通过 2驳回']
+  audit_remark  varchar(255) [note: '审核备注']
+  submitted_at  timestamp    [not null, default: `CURRENT_TIMESTAMP`, note: '提交时间']
+  audited_at    timestamp    [note: '审核时间']
+}
+
+// ─── 演出 / 场次 / 分区 / 座位 ──────────────────────────────
+
+Table show {
+  show_id         int [pk, increment, note: '演出ID']
+  user_id         int [not null, ref: > user.user_id, note: '演出方用户ID']
+  title           varchar(255) [not null, note: '演出名称']
+  category        varchar(255) [not null, note: '类型：演唱会/话剧/音乐节/音乐会/舞蹈/体育赛事/展览/其他']
+  venue           varchar(255) [not null, note: '场馆名称与地址']
+  description     text         [note: '演出简介']
+  lineup          text         [note: '演出阵容']
+  notice          text         [note: '购票须知']
+  poster_url      varchar(255) [note: '海报图片URL']
+  audit_status    int          [not null, default: 0, note: '审核状态：0待审 1上线 2驳回 3下架 4草稿']
+  is_recommended  int          [not null, default: 0, note: '是否首页推荐']
+  recommend_order int          [note: '推荐位排序']
+  fav_count       int          [not null, default: 0, note: '收藏数（冗余）']
+  created_time    timestamp    [not null, default: `CURRENT_TIMESTAMP`, note: '创建时间']
+}
+
+Table session {
+  session_id        int [pk, increment, note: '场次ID']
+  show_id           int [not null, ref: > show.show_id, note: '所属演出']
+  start_time        timestamp [not null, note: '演出开始时间']
+  end_time          timestamp [not null, note: '演出结束时间']
+  ticket_open_time  timestamp [not null, note: '开票时间，≤start_time']
+  is_hot            int       [not null, default: 0, note: '是否触发排队：0否 1是']
+  concurrent_limit  int       [not null, default: 0, note: '虚拟排队同时放行人数：0使用系统默认人数']
+  max_per_order     int       [not null, default: 4, note: '单次最大购票数（≥1）']
+  allow_refund      int       [not null, default: 1, note: '是否允许退票：0否 1是']
+  refund_fee_rate   decimal   [not null, default: 0, note: '退票手续费比例（%），0~100']
+  refund_deadline   timestamp [note: '退票截止时间（默认start_time前24h）']
+  waiting_enabled   int       [not null, default: 0, note: '是否开启候补：0否 1是']
+  reservation_count int       [not null, default: 0, note: '预约人数']
+  seat_select_enabled int     [not null, default: 1, note: '是否需要选座：0按分区数量购票 1手动选座购票']
+  seat_rows         int       [note: '座位行数（仅seat_select_enabled=1时有效）']
+  seat_cols         int       [note: '座位列数（仅seat_select_enabled=1时有效）']
+}
+
+Table zone {
+  zone_id         int [pk, increment, note: '分区ID']
+  session_id      int [not null, ref: > session.session_id, note: '所属场次']
+  name            varchar(255) [not null, note: '分区名称（如A区、VIP区）']
+  price           decimal [not null, note: '票价（>0）']
+  total_seats     int     [not null, note: '总座位数（≥1）']
+  remaining_count int     [not null, note: '剩余可售数量（≥0）']
+}
+
+Table seat {
+  seat_id        int [pk, increment, note: '座位ID']
+  session_id     int [not null, ref: > session.session_id, note: '所属场次']
+  zone_id        int [not null, ref: > zone.zone_id, note: '所属分区/票档']
+  row_no         int [not null, note: '排号']
+  col_no         int [not null, note: '座号']
+  seat_label     varchar(255) [not null, note: '座位显示名称']
+  status         int          [not null, default: 0, note: '0可售 1锁定中 2已售']
+  lock_time      timestamp    [note: '锁定时间']
+  lock_expire_time timestamp   [note: '锁定过期时间']
+  lock_user_id   int          [ref: > user.user_id, note: '当前锁座用户']
+  lock_token     varchar(64)  [note: '锁座凭证']
+
+  indexes {
+    (session_id, zone_id, row_no, col_no) [unique, name: 'seat_unique_index_0']
+    (session_id, zone_id, status)         [name: 'seat_index_0']
+    (lock_token)                          [name: 'seat_lock_index_0']
+  }
+}
+
+// ─── 订单 / 电子票 / 退款 ────────────────────────────────────
+
+Table order_info {
+  order_id     int [pk, increment, note: '订单ID']
+  user_id      int [not null, ref: > user.user_id, note: '买家用户ID']
+  session_id   int [not null, ref: > session.session_id, note: '场次ID']
+  zone_id      int [not null, ref: > zone.zone_id, note: '分区ID']
+  ticket_count int [not null, note: '购票张数（≥1）']
+  total_amount decimal [not null, note: '订单总金额（>0）']
+  status       int     [not null, default: 0, note: '状态：0待付 1已付 2已退款 3已取消 4已完成']
+  paid_time    timestamp [note: '支付时间']
+  pay_method   varchar(20) [note: '支付方式：wechat/alipay/bank']
+  expire_time  timestamp [note: '待支付过期时间']
+  created_time timestamp [not null, default: `CURRENT_TIMESTAMP`, note: '下单时间']
+}
+
+Table order_seat {
+  order_id int [pk, ref: > order_info.order_id, note: '订单ID']
+  seat_id  int [pk, ref: > seat.seat_id, note: '座位ID']
+}
+
+Table ticket {
+  ticket_id  int [pk, increment, note: '电子票ID']
+  order_id   int [not null, ref: > order_info.order_id, note: '所属订单']
+  seat_id    int [ref: > seat.seat_id, note: '对应具体座位；按分区数量购票时为空']
+  qr_code    varchar(255) [not null, note: '二维码（含防伪签名）']
+  status     int [not null, default: 1, note: '状态：1有效 2已退票']
+  created_at timestamp [not null, default: `CURRENT_TIMESTAMP`, note: '生成时间']
+}
+
+Table refund {
+  refund_id    int [pk, increment, note: '退款ID']
+  order_id     int [not null, ref: > order_info.order_id, note: '原订单ID']
+  refund_amount decimal [not null, note: '退款金额（>0）']
+  fee_amount    decimal [not null, default: 0, note: '退款手续费']
+  status        int     [not null, default: 0, note: '状态：0处理中 1已完成 2失败']
+  reason        varchar(255) [note: '退款原因']
+  created_at    timestamp [not null, default: `CURRENT_TIMESTAMP`, note: '申请时间']
+  completed_at  timestamp [note: '完成时间']
+}
+
+// ─── 预约 / 候补 / 排队 ─────────────────────────────────────
+
+Table reservation {
+  reservation_id int [pk, increment, note: '预约ID']
+  user_id        int [not null, ref: > user.user_id, note: '用户ID']
+  session_id     int [not null, ref: > session.session_id, note: '场次ID']
+  zone_id        int [ref: > zone.zone_id, note: '意向分区']
+  status         int [not null, default: 1, note: '状态：1有效 2已失效']
+  created_at     timestamp [not null, default: `CURRENT_TIMESTAMP`, note: '预约时间']
+
+  indexes {
+    (user_id, session_id) [unique, name: 'reservation_index_0']
+  }
+}
+
+Table waiting_list {
+  waiting_id      int [pk, increment, note: '候补记录ID']
+  user_id         int [not null, ref: > user.user_id, note: '用户ID']
+  session_id      int [not null, ref: > session.session_id, note: '场次ID']
+  zone_id         int [not null, ref: > zone.zone_id, note: '分区ID']
+  queue_order     int [not null, note: '候补排队序号（≥1）']
+  requested_count int [not null, default: 1, note: '申请候补张数']
+  reserved_count  int [not null, default: 0, note: '已为候补锁定张数']
+  lock_token      varchar(64) [note: '候补锁票令牌']
+  status          int [not null, default: 0, note: '状态：0等待中 1已通知 2已购票 3已跳过 4已取消']
+  notify_time     timestamp [note: '通知时间']
+  expire_time     timestamp [note: '通知过期时间（notify_time+15分钟）']
+  created_at      timestamp [not null, default: `CURRENT_TIMESTAMP`, note: '加入时间']
+}
+
+Table queue {
+  queue_id     int [pk, increment, note: '排队记录ID']
+  user_id      int [not null, ref: > user.user_id, note: '排队用户ID']
+  session_id   int [not null, ref: > session.session_id, note: '目标场次ID']
+  queue_no     int [not null, note: '排队序号（严格递增）']
+  status       int [not null, default: 0, note: '状态：0排队中 1已放行 2已过期 3已取消']
+  join_time    timestamp [not null, default: `CURRENT_TIMESTAMP`, note: '进入排队时间']
+  release_time timestamp [note: '放行时间']
+  expire_time  timestamp [note: '放行后过期时间']
+}
+
+// ─── 收藏 ───────────────────────────────────────────────────
+
+Table favorite_show {
+  user_id    int [pk, ref: > user.user_id, note: '用户ID']
+  show_id    int [pk, ref: > show.show_id, note: '演出ID']
+  created_at timestamp [not null, default: `CURRENT_TIMESTAMP`, note: '收藏时间']
+}
+
+// ─── 论坛：帖子 / 评论 / 点赞 / 收藏 / 标签 / 媒体 ──────────
+
+Table post {
+  post_id       int [pk, increment, note: '帖子ID']
+  user_id       int [not null, ref: > user.user_id, note: '发帖用户ID']
+  show_id       int [ref: > show.show_id, note: '关联演出ID（可选）']
+  title         varchar(255) [not null, note: '帖子标题（2-100字符）']
+  content       text [not null, note: '帖子正文（1-10000字符）']
+  audit_status  int [not null, default: 0, note: '审核状态：0待审 1通过 2屏蔽']
+  like_count    int [not null, default: 0, note: '点赞数（冗余）']
+  fav_count     int [not null, default: 0, note: '收藏数（冗余）']
+  comment_count int [not null, default: 0, note: '回复数（冗余）']
+  post_time     timestamp [not null, default: `CURRENT_TIMESTAMP`, note: '发帖时间']
+}
+
+Table post_tag {
+  tag_id  int [pk, increment, note: '标签ID']
+  post_id int [not null, ref: > post.post_id, note: '帖子ID']
+  tag     varchar(40) [not null, note: '标签名']
+
+  indexes {
+    (post_id, tag) [unique, name: 'uk_post_tag']
+    (tag)          [name: 'idx_tag']
+  }
+}
+
+Table post_media {
+  media_id      int [pk, increment, note: '媒体ID']
+  post_id       int [not null, ref: > post.post_id, note: '帖子ID']
+  media_type    varchar(10)  [not null, note: '媒体类型：image/video']
+  media_url     varchar(500) [not null, note: '媒体访问地址']
+  original_name varchar(255) [note: '原始文件名']
+  mime_type     varchar(100) [note: 'MIME类型']
+  file_size     bigint       [not null, default: 0, note: '文件大小（字节）']
+  sort_order    int          [not null, default: 0, note: '展示顺序']
+  created_at    timestamp    [not null, default: `CURRENT_TIMESTAMP`, note: '上传时间']
+
+  indexes {
+    (post_id, sort_order) [name: 'idx_post_media']
+  }
+}
+
+Table comment {
+  comment_id   int [pk, increment, note: '评论ID']
+  post_id      int [not null, ref: > post.post_id, note: '所属帖子ID']
+  user_id      int [not null, ref: > user.user_id, note: '评论用户ID']
+  content      varchar(500) [not null, note: '评论内容（1-500字符）']
+  comment_time timestamp [not null, default: `CURRENT_TIMESTAMP`, note: '评论时间']
+}
+
+Table like {
+  user_id    int [pk, ref: > user.user_id, note: '用户ID']
+  post_id    int [pk, ref: > post.post_id, note: '帖子ID']
+  created_at timestamp [not null, default: `CURRENT_TIMESTAMP`, note: '点赞时间']
+}
+
+Table favorite_post {
+  user_id    int [pk, ref: > user.user_id, note: '用户ID']
+  post_id    int [pk, ref: > post.post_id, note: '帖子ID']
+  created_at timestamp [not null, default: `CURRENT_TIMESTAMP`, note: '收藏时间']
+}
+
+// ─── 举报 / 消息 / 审计日志 ─────────────────────────────────
+
+Table report {
+  report_id   int [pk, increment, note: '举报ID']
+  user_id     int [not null, ref: > user.user_id, note: '举报人ID']
+  post_id     int [not null, ref: > post.post_id, note: '被举报帖子ID']
+  reason      varchar(500) [not null, note: '举报原因（≤500字）']
+  status      int [not null, default: 0, note: '状态：0待处理 1已处理 2已驳回']
+  report_time timestamp [not null, default: `CURRENT_TIMESTAMP`, note: '举报时间']
+}
+
+Table message {
+  message_id int [pk, increment, note: '消息ID']
+  user_id    int [not null, ref: > user.user_id, note: '接收用户ID']
+  title      varchar(255) [not null, note: '消息标题']
+  content    text [not null, note: '消息内容']
+  is_read    int [not null, default: 0, note: '是否已读：0未读 1已读']
+  created_at timestamp [not null, default: `CURRENT_TIMESTAMP`, note: '发送时间']
+}
+
+Table audit_log {
+  log_id      int [pk, increment, note: '日志ID']
+  admin_id    int [not null, ref: > user.user_id, note: '操作管理员ID']
+  target_type varchar(255) [not null, note: '目标类型（user/show/post/refund/qualification）']
+  target_id   int [not null, note: '目标记录ID']
+  action      varchar(255) [not null, note: '操作类型（approve/reject/block/suspend等）']
+  result      int [not null, note: '处理结果代码']
+  remark      varchar(255) [note: '操作备注/原因']
+  created_at  timestamp [not null, default: `CURRENT_TIMESTAMP`, note: '操作时间']
+}
+
+// ─── 关系总结 ───────────────────────────────────────────────
+// user ──< user_qualification
+// user ──< show
+// user ──< seat (lock_user_id)
+// show ──< session ──< zone ──< seat
+// user ──< order_info ──< order_seat >── seat
+// order_info ──< ticket
+// order_info ──< refund
+// session ──< user (via reservation)
+// session ──< user (via waiting_list)
+// session ──< user (via queue)
+// user ──< favorite_show >── show
+// user ──< post ──< comment
+// user ──< post (via like)
+// user ──< post (via favorite_post)
+// post ──< post_tag
+// post ──< post_media
+// user ──< report >── post
+// user ──< message
+// user ──< audit_log

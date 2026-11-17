@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>电子票务系统 - 后台管理</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div class="bg-orb orb-a"></div>
+  <div class="bg-orb orb-b"></div>
+
+  <header class="site-header">
+    <div class="shell header-inner">
+      <div class="brand">
+        <div class="brand-logo">管</div>
+        <div>
+          <h1>后台管理系统</h1>
+          <p>演出方 & 运营管理</p>
+        </div>
+      </div>
+
+      <nav class="main-nav" id="roleNav">
+        <button class="nav-btn active" data-role="1" type="button">演出方后台</button>
+        <button class="nav-btn" data-role="2" type="button">运营管理</button>
+      </nav>
+
+      <div class="header-actions">
+        <button id="authBtn" class="primary-btn" type="button">登录</button>
+        <div id="userInfo" class="hidden" style="display:flex;align-items:center;gap:12px">
+          <span id="userName" style="font-size:13px;color:var(--muted)"></span>
+          <button id="logoutBtn" class="ghost-btn" type="button" style="font-size:12px;padding:6px 12px">退出</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="shell page-main">
+
+    <!-- ========== Organizer View ========== -->
+    <section id="organizerView" class="view-section hidden">
+
+      <nav class="sub-nav">
+        <button class="sub-nav-btn active" data-org-sub="qual">资质入驻</button>
+        <button class="sub-nav-btn" data-org-sub="list">演出管理</button>
+        <button class="sub-nav-btn" data-org-sub="edit" style="display:none" id="orgEditNavBtn">编辑演出</button>
+        <button class="sub-nav-btn" data-org-sub="sales">销售数据</button>
+      </nav>
+
+      <!-- Qualification -->
+      <section id="orgQualSection" class="view-section">
+        <section class="panel">
+          <div class="panel-head">
+            <div><h3>资质入驻</h3><p class="muted">提交公司信息，审核通过后即可发布演出。</p></div>
+          </div>
+          <div id="orgQualStatus"></div>
+          <form id="orgQualForm" class="form-stack">
+            <label><span>公司名称</span><input name="companyName" required placeholder="输入公司全称"></label>
+            <label><span>统一社会信用代码</span><input name="creditCode" required placeholder="18位代码" pattern="[0-9A-Z]{18}" maxlength="18"></label>
+            <label><span>营业执照URL</span><input name="licenseUrl" required placeholder="营业执照图片链接"></label>
+            <label><span>联系人</span><input name="contactName" required placeholder="联系人姓名"></label>
+            <label><span>联系电话</span><input name="contactPhone" required placeholder="11位手机号" pattern="1[3-9]\d{9}" maxlength="11"></label>
+            <button class="primary-btn" type="submit">提交申请</button>
+          </form>
+        </section>
+      </section>
+
+      <!-- Show List -->
+      <section id="orgShowListSection" class="view-section hidden">
+        <section class="panel">
+          <div class="panel-head">
+            <div><h3>我的演出</h3><p id="orgShowMeta" class="muted"></p></div>
+            <button class="primary-btn" id="orgNewShowBtn" type="button">新建演出</button>
+          </div>
+          <div class="chip-row" style="margin-bottom:16px" id="orgStatusFilters">
+            <button class="chip chip-btn active" data-org-status="">全部</button>
+            <button class="chip chip-btn" data-org-status="4">草稿</button>
+            <button class="chip chip-btn" data-org-status="0">待审核</button>
+            <button class="chip chip-btn" data-org-status="1">已上线</button>
+            <button class="chip chip-btn" data-org-status="2">已驳回</button>
+            <button class="chip chip-btn" data-org-status="3">已下架</button>
+          </div>
+          <div id="orgShowTable" class="table-wrap"></div>
+          <div id="orgShowPager" class="pager"></div>
+        </section>
+      </section>
+
+      <!-- Show Edit -->
+      <section id="orgShowEditSection" class="view-section hidden">
+        <section class="panel">
+          <div class="panel-head">
+            <div><h3 id="orgEditTitle">新建演出</h3><p class="muted">分步填写演出信息</p></div>
+            <button class="ghost-btn" data-org-back type="button">返回列表</button>
+          </div>
+
+          <div class="steps" id="orgEditSteps">
+            <span class="step active" data-n="1">基本信息</span>
+            <span class="step-line"></span>
+            <span class="step" data-n="2">场次与分区</span>
+            <span class="step-line"></span>
+            <span class="step" data-n="3">票务规则</span>
+          </div>
+
+          <!-- Step 1: Show Info -->
+          <form id="orgEditStep1" class="form-stack">
+            <label><span>演出名称</span><input name="title" required></label>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+              <label><span>演出类型</span><select name="category" required>
+                <option value="">请选择</option>
+                <option value="演唱会">演唱会</option><option value="音乐剧">音乐剧</option>
+                <option value="音乐节">音乐节</option><option value="芭蕾舞剧">芭蕾舞剧</option>
+                <option value="展览">展览</option><option value="脱口秀">脱口秀</option>
+              </select></label>
+              <label><span>场馆</span><input name="venue" required></label>
+            </div>
+            <label><span>演出简介</span><textarea name="description" rows="3"></textarea></label>
+            <label><span>演出阵容</span><input name="lineup" placeholder="主要演员/阵容"></label>
+            <label><span>购票须知</span><textarea name="notice" rows="2"></textarea></label>
+            <label><span>海报URL</span><input name="posterUrl" placeholder="海报图片链接"></label>
+            <div class="inline-actions">
+              <button class="primary-btn" type="button" data-step-next="2">下一步：场次与分区</button>
+            </div>
+          </form>
+
+          <!-- Step 2: Sessions + Zones -->
+          <div id="orgEditStep2" class="hidden">
+            <div id="orgSessionList" class="session-list"></div>
+            <button class="ghost-btn" id="orgAddSessionBtn" type="button" style="margin-top:12px">+ 添加场次</button>
+            <div class="inline-actions" style="margin-top:18px">
+              <button class="ghost-btn" type="button" data-step-prev="1">上一步</button>
+              <button class="primary-btn" type="button" data-step-next="3">下一步：票务规则</button>
+            </div>
+          </div>
+
+          <!-- Step 3: Rules + Submit -->
+          <div id="orgEditStep3" class="hidden">
+            <div id="orgEditStep3Sessions"></div>
+            <div class="inline-actions" style="margin-top:18px">
+              <button class="ghost-btn" type="button" data-step-prev="2">上一步</button>
+              <button class="primary-btn" id="orgSaveDraftBtn" type="button">保存草稿</button>
+              <button class="primary-btn" id="orgSubmitReviewBtn" type="button">提交审核</button>
+            </div>
+          </div>
+        </section>
+      </section>
+
+      <!-- Sales Dashboard -->
+      <section id="orgSalesSection" class="view-section hidden">
+        <section class="panel">
+          <div class="panel-head">
+            <div><h3>销售数据</h3><p class="muted">按演出查看销售概况与分区明细</p></div>
+            <button class="ghost-btn" data-org-back type="button">返回列表</button>
+          </div>
+          <label style="max-width:360px;margin-bottom:16px">
+            <span>选择演出</span>
+            <select id="orgSalesShowSelect"></select>
+          </label>
+          <div id="orgSalesOverview" class="stat-grid"></div>
+          <h4 style="margin:18px 0 10px">分区销售明细</h4>
+          <div id="orgSalesZoneTable" class="table-wrap"></div>
+        </section>
+      </section>
+    </section>
+
+    <!-- ========== Admin View ========== -->
+    <section id="adminView" class="view-section hidden">
+
+      <nav class="sub-nav">
+        <button class="sub-nav-btn active" data-admin-sub="home">仪表盘</button>
+        <button class="sub-nav-btn" data-admin-sub="auditCenter">审核中心</button>
+        <button class="sub-nav-btn" data-admin-sub="qualAudit">入驻审核</button>
+        <button class="sub-nav-btn" data-admin-sub="users">用户管理</button>
+        <button class="sub-nav-btn" data-admin-sub="orders">订单管理</button>
+        <button class="sub-nav-btn" data-admin-sub="recommend">推荐位</button>
+      </nav>
+
+      <section id="adminHomeSection" class="view-section">
+        <section class="panel">
+          <div class="panel-head"><div><h3>运营仪表盘</h3><p class="muted">核心数据概览</p></div></div>
+          <div id="adminOverviewStats" class="stat-grid"></div>
+          <h4 style="margin:18px 0 10px">热门演出 Top 20</h4>
+          <div id="adminTopShows" class="table-wrap"></div>
+        </section>
+      </section>
+
+      <section id="adminAuditCenterSection" class="view-section hidden">
+        <section class="panel">
+          <div class="panel-head"><div><h3>审核中心</h3><p id="adminAuditMeta" class="muted"></p></div></div>
+          <div class="tabs" style="margin-bottom:16px">
+            <button class="tab-btn active" data-audit-tab="shows">演出审核</button>
+            <button class="tab-btn" data-audit-tab="posts">帖子审核</button>
+          </div>
+          <div id="adminShowAuditList" class="table-wrap"></div>
+          <div id="adminPostAuditList" class="table-wrap hidden"></div>
+          <div id="adminAuditPager" class="pager"></div>
+        </section>
+      </section>
+
+      <section id="adminShowDetailSection" class="view-section hidden">
+        <section class="panel">
+          <div class="panel-head">
+            <div><h3>演出审核详情</h3><p class="muted">查看完整信息并审批</p></div>
+            <button class="ghost-btn" data-admin-back="auditCenter" type="button">返回审核列表</button>
+          </div>
+          <div id="adminShowDetailBody"></div>
+          <div class="detail-block" style="margin-top:16px">
+            <label><span>审核备注</span><input id="adminAuditRemark" placeholder="可选填审批意见"></label>
+            <div class="inline-actions" style="margin-top:10px">
+              <button class="primary-btn" id="adminApproveShowBtn" type="button">审核通过</button>
+              <button class="ghost-btn" id="adminRejectShowBtn" type="button">驳回</button>
+              <button class="ghost-btn" id="adminOfflineShowBtn" type="button">下架</button>
+            </div>
+          </div>
+        </section>
+      </section>
+
+      <section id="adminQualAuditSection" class="view-section hidden">
+        <section class="panel">
+          <div class="panel-head"><div><h3>入驻资质审核</h3><p id="adminQualMeta" class="muted"></p></div></div>
+          <div id="adminQualAuditList" class="table-wrap"></div>
+          <div id="adminQualPager" class="pager"></div>
+        </section>
+      </section>
+
+      <section id="adminUserListSection" class="view-section hidden">
+        <section class="panel">
+          <div class="panel-head"><div><h3>用户管理</h3><p class="muted">搜索用户并管理违规行为</p></div></div>
+          <form id="adminUserSearchForm" class="search-bar" style="margin-bottom:16px">
+            <label><span>搜索</span><input name="keyword" placeholder="手机号 / 昵称 / 用户ID"></label>
+            <button class="primary-btn" type="submit">搜索</button>
+          </form>
+          <div id="adminUserList" class="table-wrap"></div>
+          <div id="adminUserPager" class="pager"></div>
+        </section>
+      </section>
+
+      <section id="adminUserDetailSection" class="view-section hidden">
+        <section class="panel">
+          <div class="panel-head">
+            <div><h3>用户详情</h3><p class="muted"></p></div>
+            <button class="ghost-btn" data-admin-back="users" type="button">返回用户列表</button>
+          </div>
+          <div id="adminUserDetailBody"></div>
+        </section>
+      </section>
+
+      <section id="adminOrderListSection" class="view-section hidden">
+        <section class="panel">
+          <div class="panel-head"><div><h3>订单管理</h3><p id="adminOrderMeta" class="muted"></p></div></div>
+          <form id="adminOrderFilterForm" class="filter-grid" style="margin-bottom:16px">
+            <label><span>关键词</span><input name="keyword" placeholder="订单号/手机号"></label>
+            <label><span>状态</span><select name="status">
+              <option value="">全部</option><option value="0">待支付</option><option value="1">已支付</option>
+              <option value="2">已退款</option><option value="3">已取消</option><option value="4">已完成</option>
+            </select></label>
+            <label><span>开始时间</span><input type="date" name="startTime"></label>
+            <label><span>结束时间</span><input type="date" name="endTime"></label>
+            <div class="search-bar-actions">
+              <button class="primary-btn" type="submit">筛选</button>
+              <button class="ghost-btn" type="reset">重置</button>
+            </div>
+          </form>
+          <div id="adminOrderList" class="table-wrap"></div>
+          <div id="adminOrderPager" class="pager"></div>
+        </section>
+      </section>
+
+      <section id="adminRecommendSection" class="view-section hidden">
+        <section class="panel">
+          <div class="panel-head"><div><h3>首页推荐管理</h3><p class="muted">管理首页推荐位（最多5个）</p></div></div>
+          <div id="adminRecommendList" class="stack-list"></div>
+          <div class="detail-block" style="margin-top:16px">
+            <h4>添加推荐</h4>
+            <div class="search-bar">
+              <label><span>演出ID</span><input id="adminAddRecommendInput" type="number" placeholder="输入演出ID"></label>
+              <button class="primary-btn" id="adminAddRecommendBtn" type="button">添加</button>
+            </div>
+          </div>
+        </section>
+      </section>
+    </section>
+  </main>
+
+  <!-- Login Modal -->
+  <section id="authModal" class="modal hidden">
+    <div class="modal-card">
+      <div class="panel-head">
+        <div><h3 id="authModalTitle">登录后台管理</h3></div>
+        <button id="closeAuthBtn" class="close-btn" type="button">×</button>
+      </div>
+      <div class="tabs" style="margin-bottom:16px">
+        <button class="tab-btn active" data-auth-tab="login">登录</button>
+        <button class="tab-btn" data-auth-tab="register">注册</button>
+      </div>
+      <form id="loginForm" class="form-stack">
+        <label><span>手机号</span><input name="phone" required placeholder="请输入11位手机号" pattern="1[3-9]\d{9}" maxlength="11"></label>
+        <label><span>密码</span><input name="password" type="password" required placeholder="请输入密码" minlength="6"></label>
+        <button class="primary-btn" type="submit">登录</button>
+      </form>
+      <form id="registerForm" class="form-stack hidden">
+        <label><span>手机号</span><input name="phone" required placeholder="请输入11位手机号" pattern="1[3-9]\d{9}" maxlength="11"></label>
+        <label><span>密码</span><input name="password" type="password" required placeholder="请输入密码（至少6位）" minlength="6"></label>
+        <label><span>昵称（可选）</span><input name="nickname" placeholder="给自己取个名字"></label>
+        <p class="muted" style="font-size:12px;margin:0">注册后需完成资质入驻才能发布演出</p>
+        <button class="primary-btn" type="submit">注册并登录</button>
+      </form>
+    </div>
+  </section>
+
+  <div id="toast" class="toast hidden"></div>
+  <script src="./app.js?v=4"></script>
+  <script src="./organizer.js?v=4"></script>
+  <script src="./admin.js?v=4"></script>
+</body>
+</html>

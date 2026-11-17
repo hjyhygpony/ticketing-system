@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bjut.cs.ticket.mapper.SessionMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.bjut.cs.ticket.entity.Session">
+        <id column="session_id" property="sessionId" />
+        <result column="show_id" property="showId" />
+        <result column="start_time" property="startTime" />
+        <result column="end_time" property="endTime" />
+        <result column="ticket_open_time" property="ticketOpenTime" />
+        <result column="is_hot" property="isHot" />
+        <result column="max_per_order" property="maxPerOrder" />
+        <result column="allow_refund" property="allowRefund" />
+        <result column="refund_fee_rate" property="refundFeeRate" />
+        <result column="refund_deadline" property="refundDeadline" />
+        <result column="waiting_enabled" property="waitingEnabled" />
+        <result column="reservation_count" property="reservationCount" />
+    </resultMap>
+
+</mapper>

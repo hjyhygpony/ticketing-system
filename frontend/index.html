@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>电子票务系统</title>
+  <link rel="stylesheet" href="./styles.css">
+  <link rel="stylesheet" href="./home.css">
+  <link rel="stylesheet" href="./forum.css">
+  <link rel="stylesheet" href="./modal.css">
+  <link rel="stylesheet" href="./user.css">
+</head>
+<body>
+  <div class="bg-orb orb-a"></div>
+  <div class="bg-orb orb-b"></div>
+
+  <header class="site-header">
+    <div class="shell header-inner">
+      <div class="brand">
+        <div class="brand-logo">票</div>
+        <div>
+          <h1>电子票务系统</h1>
+          <p>演出浏览、预约与用户中心</p>
+        </div>
+      </div>
+
+      <nav class="main-nav">
+        <button class="nav-btn active" data-view="home" type="button">首页</button>
+        <button class="nav-btn" data-view="forum" type="button">论坛</button>
+        <button class="nav-btn" data-view="user" type="button">用户中心</button>
+      </nav>
+
+      <div class="header-actions">
+        <button id="authBtn" class="primary-btn" type="button">登录 / 注册</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="shell page-main">
+    <section id="homeView" class="view-section">
+      <section class="search-hero">
+        <form id="searchForm" class="search-hero-form">
+          <label class="hero-input">
+            <span>搜索演出</span>
+            <input name="keyword" placeholder="输入演出名、场馆或阵容">
+          </label>
+          <button class="primary-btn hero-search-btn" type="submit">立即搜索</button>
+        </form>
+      </section>
+
+      <section id="homeDiscoverySection" class="view-section">
+        <section class="panel featured-panel">
+          <div class="carousel">
+            <button id="prevSlideBtn" class="carousel-btn" type="button">&#8249;</button>
+            <div id="featuredTrack" class="featured-track"></div>
+            <button id="nextSlideBtn" class="carousel-btn" type="button">&#8250;</button>
+          </div>
+          <div id="featuredDots" class="featured-dots"></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <h3>近期演出</h3>
+              <p id="homeResultMeta" class="muted">正在加载近期演出...</p>
+            </div>
+          </div>
+          <div id="homeShowGrid" class="show-grid"></div>
+        </section>
+      </section>
+
+      <section id="searchResultSection" class="view-section hidden">
+        <div class="panel-head">
+          <div>
+            <h3>搜索结果</h3>
+            <p id="resultMeta" class="muted">准备加载结果...</p>
+          </div>
+          <button id="backHomeBtn" class="ghost-btn" type="button">返回首页</button>
+        </div>
+
+        <section class="panel result-toolbar">
+          <form id="filterForm" class="filter-grid">
+            <label>
+              <span>演出类型</span>
+              <select name="category">
+                <option value="">全部类型</option>
+                <option value="演唱会">演唱会</option>
+                <option value="音乐剧">音乐剧</option>
+                <option value="音乐节">音乐节</option>
+                <option value="芭蕾舞剧">芭蕾舞剧</option>
+                <option value="展览">展览</option>
+                <option value="脱口秀">脱口秀</option>
+              </select>
+            </label>
+            <label>
+              <span>开始日期</span>
+              <input type="date" name="start_date">
+            </label>
+            <label>
+              <span>结束日期</span>
+              <input type="date" name="end_date">
+            </label>
+            <label>
+              <span>最低票价</span>
+              <input type="number" name="min_price" min="0" placeholder="0">
+            </label>
+            <label>
+              <span>最高票价</span>
+              <input type="number" name="max_price" min="0" placeholder="9999">
+            </label>
+            <label>
+              <span>排序方式</span>
+              <select name="sort">
+                <option value="nearest">最近开演</option>
+                <option value="latest">最新上架</option>
+                <option value="price_asc">票价从低到高</option>
+                <option value="price_desc">票价从高到低</option>
+                <option value="popular">收藏热度</option>
+              </select>
+            </label>
+            <div class="search-bar-actions">
+              <button class="primary-btn" type="submit">应用筛选</button>
+              <button id="resetBtn" class="ghost-btn" type="button">清空条件</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="panel">
+          <div id="showGrid" class="show-grid"></div>
+        </section>
+      </section>
+    </section>
+
+    <section id="forumView" class="view-section hidden">
+      <section id="forumListSection" class="view-section">
+        <section class="panel forum-hero-panel">
+          <div class="panel-head forum-head">
+            <div>
+              <h3>票友论坛</h3>
+              <p id="forumMeta" class="muted">搜索栏只按标签匹配帖子，支持发帖、评论、点赞、收藏和举报。</p>
+            </div>
+            <div class="inline-actions">
+              <button id="myForumBtn" class="ghost-btn" type="button">我的论坛</button>
+              <button id="openNewPostBtn" class="primary-btn" type="button">发布帖子</button>
+            </div>
+          </div>
+
+          <form id="forumSearchForm" class="forum-search-form">
+            <label class="hero-input">
+              <span>按标签搜索</span>
+              <input name="tag" placeholder="例如：抢票经验、演唱会、候补">
+            </label>
+            <label>
+              <span>排序方式</span>
+              <select name="sort">
+                <option value="latest">最新</option>
+                <option value="hot">最热</option>
+              </select>
+            </label>
+            <button class="primary-btn" type="submit">搜索</button>
+          </form>
+
+          <div class="forum-tags-row">
+            <span class="muted">热门标签：</span>
+            <div id="forumHotTags" class="chip-row"></div>
+          </div>
+        </section>
+
+        <section class="panel forum-content-panel">
+          <div id="forumPostList" class="forum-post-list"></div>
+        </section>
+      </section>
+
+      <section id="forumNewPostSection" class="view-section hidden">
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <h3>发布帖子</h3>
+              <p class="muted">保留原逻辑：标题、正文、标签；不上传图片或视频；发帖后默认公开。</p>
+            </div>
+            <button class="ghost-btn" data-forum-back type="button">返回论坛</button>
+          </div>
+          <form id="forumNewPostForm" class="form-stack forum-form-card">
+            <label>
+              <span>标题</span>
+              <input name="title" maxlength="100" placeholder="2-100个字符">
+            </label>
+            <label>
+              <span>正文</span>
+              <textarea name="content" rows="8" maxlength="10000" placeholder="写下你的抢票经验、观演攻略或问题"></textarea>
+            </label>
+            <label>
+              <span>标签</span>
+              <input name="tags" placeholder="用空格、逗号或 # 分隔，例如：演唱会 抢票经验 北京">
+            </label>
+            <button class="primary-btn" type="submit">发布</button>
+          </form>
+        </section>
+      </section>
+
+      <section id="forumDetailSection" class="view-section hidden">
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <h3>帖子详情</h3>
+              <p class="muted">查看正文、评论、点赞、收藏与举报。</p>
+            </div>
+            <button class="ghost-btn" data-forum-back type="button">返回论坛</button>
+          </div>
+          <div id="forumDetailBody"></div>
+        </section>
+      </section>
+
+      <section id="forumMeSection" class="view-section hidden">
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <h3>我的论坛</h3>
+              <p class="muted">查看我发布的帖子和我收藏的帖子。</p>
+            </div>
+            <button class="ghost-btn" data-forum-back type="button">返回论坛</button>
+          </div>
+          <div id="forumMeBody" class="forum-me-layout"></div>
+        </section>
+      </section>
+    </section>
+
+    <section id="userView" class="view-section hidden">
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <h3>用户中心</h3>
+            <p id="profileMeta" class="muted">登录后可查看个人信息、实名认证、收藏、预约、订单和消息。</p>
+          </div>
+        </div>
+
+        <div id="profileSummary" class="summary-grid"></div>
+
+        <div class="user-layout">
+          <div class="user-column">
+            <section class="sub-panel">
+              <button class="collapse-toggle" data-panel-toggle="basic" type="button">
+                <span class="collapse-copy">
+                  <span class="collapse-title">基本信息</span>
+                  <span id="verifyStatus" class="muted">未登录</span>
+                </span>
+                <span class="collapse-arrow" data-panel-arrow="basic">▸</span>
+              </button>
+              <div id="basicPanelBody" class="collapse-body hidden" data-panel-body="basic">
+                <div id="basicInfoCard" class="basic-info"></div>
+              </div>
+            </section>
+
+            <section class="sub-panel">
+              <button class="collapse-toggle" data-panel-toggle="reservation" type="button">
+                <span class="collapse-copy">
+                  <span class="collapse-title">我的预约</span>
+                  <span class="muted">可在此处取消预约</span>
+                </span>
+                <span class="collapse-arrow" data-panel-arrow="reservation">▸</span>
+              </button>
+              <div class="collapse-body hidden" data-panel-body="reservation">
+                <div id="reservationList" class="stack-list"></div>
+              </div>
+            </section>
+          </div>
+
+          <div class="user-column">
+            <section class="sub-panel">
+              <button class="collapse-toggle" data-panel-toggle="verify" type="button">
+                <span class="collapse-copy">
+                  <span class="collapse-title">实名认证</span>
+                  <span class="muted">预约演出需实名认证</span>
+                </span>
+                <span class="collapse-arrow" data-panel-arrow="verify">▸</span>
+              </button>
+              <div id="verifyPanelBody" class="collapse-body hidden" data-panel-body="verify">
+                <div id="verifyNote" class="verify-note">
+                  未实名认证用户可浏览演出和论坛，但不可预约。
+                </div>
+                <div id="verifyDone" class="verify-done hidden"></div>
+                <form id="verifyForm" class="form-stack">
+                <label>
+                  <span>真实姓名</span>
+                  <input name="real_name" placeholder="输入真实姓名">
+                </label>
+                <label>
+                  <span>身份证号</span>
+                  <input name="idcard" placeholder="输入18位身份证号">
+                </label>
+                <label class="checkbox-row">
+                  <input type="checkbox" name="promise">
+                  <span>本人承诺填写信息真实有效</span>
+                </label>
+                <button class="primary-btn" type="submit">提交认证</button>
+                </form>
+              </div>
+            </section>
+
+            <section class="sub-panel">
+              <button class="collapse-toggle" data-panel-toggle="order" type="button">
+                <span class="collapse-copy">
+                  <span class="collapse-title">我的订单</span>
+                  <span class="muted">在此处查看订单状态</span>
+                </span>
+                <span class="collapse-arrow" data-panel-arrow="order">▸</span>
+              </button>
+              <div class="collapse-body hidden" data-panel-body="order">
+                <div id="orderList" class="stack-list"></div>
+              </div>
+            </section>
+          </div>
+
+          <div class="user-column">
+            <section class="sub-panel">
+              <button class="collapse-toggle" data-panel-toggle="favorite" type="button">
+                <span class="collapse-copy">
+                  <span class="collapse-title">我的收藏</span>
+                  <span class="muted">按收藏时间倒序</span>
+                </span>
+                <span class="collapse-arrow" data-panel-arrow="favorite">▸</span>
+              </button>
+              <div class="collapse-body hidden" data-panel-body="favorite">
+                <div id="favoriteList" class="stack-list"></div>
+              </div>
+            </section>
+
+            <section class="sub-panel">
+              <button class="collapse-toggle" data-panel-toggle="message" type="button">
+                <span class="collapse-copy">
+                  <span class="collapse-title">站内消息</span>
+                  <span class="muted">最近 50 条</span>
+                </span>
+                <span class="collapse-arrow" data-panel-arrow="message">▸</span>
+              </button>
+              <div class="collapse-body hidden" data-panel-body="message">
+                <div id="messageList" class="stack-list"></div>
+              </div>
+            </section>
+          </div>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <aside id="detailDrawer" class="detail-drawer hidden">
+    <div class="drawer-head">
+      <h3 id="drawerTitle">演出详情</h3>
+      <button id="closeDrawerBtn" class="close-line-btn" type="button" aria-label="关闭">&times;</button>
+    </div>
+    <div id="drawerBody" class="drawer-body"></div>
+  </aside>
+
+  <section id="authModal" class="modal hidden">
+    <div class="modal-card">
+      <div class="panel-head">
+        <div>
+          <h3>登录 / 注册</h3>
+        </div>
+        <button id="closeAuthBtn" class="close-line-btn" type="button" aria-label="关闭">&times;</button>
+      </div>
+
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="login" type="button">登录</button>
+        <button class="tab-btn" data-tab="register" type="button">注册</button>
+        <button class="tab-btn" data-tab="reset" type="button">重置密码</button>
+      </div>
+
+      <form id="loginForm" class="form-stack">
+        <label>
+          <span>手机号</span>
+          <input name="phone" placeholder="11位手机号">
+        </label>
+        <label>
+          <span>密码</span>
+          <input type="password" name="password" placeholder="8-20位，包含字母和数字">
+        </label>
+        <div class="inline-actions">
+          <button class="primary-btn" type="submit">登录</button>
+          <button id="openResetBtn" class="ghost-btn" type="button">忘记密码</button>
+        </div>
+      </form>
+
+      <form id="registerForm" class="form-stack hidden">
+        <label>
+          <span>手机号</span>
+          <input name="phone" placeholder="11位手机号">
+        </label>
+        <div class="inline-row">
+          <label>
+            <span>验证码</span>
+            <input name="code" placeholder="6位验证码">
+          </label>
+          <button id="codeBtn" class="ghost-btn code-btn" type="button">获取验证码</button>
+        </div>
+        <label>
+          <span>密码</span>
+          <input type="password" name="password" placeholder="8-20位，包含字母和数字">
+        </label>
+        <div id="registerPasswordHint" class="password-hint hidden">
+          <div class="password-strength">
+            <span class="muted">密码强度</span>
+            <strong id="registerStrengthText" class="strength-text weak">弱</strong>
+          </div>
+          <div class="strength-bar">
+            <span id="registerStrengthBar" class="strength-fill weak"></span>
+          </div>
+          <div class="rule-list">
+            <div id="registerRuleLength" class="rule-item">至少 8 位，最多 20 位</div>
+            <div id="registerRuleLetter" class="rule-item">至少包含 1 个字母</div>
+            <div id="registerRuleNumber" class="rule-item">至少包含 1 个数字</div>
+          </div>
+        </div>
+        <button class="primary-btn" type="submit">注册并登录</button>
+      </form>
+
+      <form id="resetForm" class="form-stack hidden">
+        <label>
+          <span>手机号</span>
+          <input name="phone" placeholder="11位手机号">
+        </label>
+        <div class="inline-row">
+          <label>
+            <span>验证码</span>
+            <input name="code" placeholder="6位验证码">
+          </label>
+          <button id="resetCodeBtn" class="ghost-btn code-btn" type="button">获取验证码</button>
+        </div>
+        <label>
+          <span>新密码</span>
+          <input type="password" name="new_password" placeholder="8-20位，包含字母和数字">
+        </label>
+        <div id="resetPasswordHint" class="password-hint hidden">
+          <div class="password-strength">
+            <span class="muted">密码强度</span>
+            <strong id="resetStrengthText" class="strength-text weak">弱</strong>
+          </div>
+          <div class="strength-bar">
+            <span id="resetStrengthBar" class="strength-fill weak"></span>
+          </div>
+          <div class="rule-list">
+            <div id="resetRuleLength" class="rule-item">至少 8 位，最多 20 位</div>
+            <div id="resetRuleLetter" class="rule-item">至少包含 1 个字母</div>
+            <div id="resetRuleNumber" class="rule-item">至少包含 1 个数字</div>
+          </div>
+        </div>
+        <button class="primary-btn" type="submit">重置密码</button>
+      </form>
+    </div>
+  </section>
+
+  <section id="verifyModal" class="modal hidden">
+    <div class="modal-card verify-modal-card">
+      <div class="panel-head">
+        <div>
+          <h3>实名认证</h3>
+          <p class="muted">完成实名认证后才可预约和购票</p>
+        </div>
+        <button id="closeVerifyModalBtn" class="close-line-btn" type="button" aria-label="关闭">&times;</button>
+      </div>
+
+      <div class="verify-modal-note">
+        你已注册成功，但当前账号还未完成实名认证。可以先浏览页面，涉及预约、购票时系统仍会再次提醒。
+      </div>
+
+      <form id="verifyModalForm" class="form-stack">
+        <label>
+          <span>真实姓名</span>
+          <input name="real_name" placeholder="输入真实姓名">
+        </label>
+        <label>
+          <span>身份证号</span>
+          <input name="idcard" placeholder="输入 18 位身份证号">
+        </label>
+        <label class="checkbox-row">
+          <input type="checkbox" name="promise">
+          <span>本人承诺填写信息真实有效</span>
+        </label>
+        <button class="primary-btn" type="submit">提交认证</button>
+      </form>
+    </div>
+  </section>
+
+  <div id="toast" class="toast hidden"></div>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

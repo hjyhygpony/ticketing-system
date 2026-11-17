@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bjut.cs.ticket.mapper.ShowMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.bjut.cs.ticket.entity.Show">
+        <id column="show_id" property="showId" />
+        <result column="user_id" property="userId" />
+        <result column="title" property="title" />
+        <result column="category" property="category" />
+        <result column="venue" property="venue" />
+        <result column="description" property="description" />
+        <result column="lineup" property="lineup" />
+        <result column="notice" property="notice" />
+        <result column="poster_url" property="posterUrl" />
+        <result column="audit_status" property="auditStatus" />
+        <result column="is_recommended" property="isRecommended" />
+        <result column="recommend_order" property="recommendOrder" />
+        <result column="fav_count" property="favCount" />
+        <result column="created_time" property="createdTime" />
+    </resultMap>
+
+</mapper>

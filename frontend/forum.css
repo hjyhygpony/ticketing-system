@@ -1,0 +1,11 @@
+.forum-placeholder {
+  min-height: 340px;
+  display: grid;
+  place-items: center;
+}
+
+.placeholder-card {
+  max-width: 480px;
+  padding: 28px;
+  text-align: center;
+}
